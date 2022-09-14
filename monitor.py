@@ -2,9 +2,8 @@ import requests
 import pandas as pd
 import datetime
 from time import sleep
-import slack
 import os
-from slack_api import SlackAgent, UserAgent
+from slack_api import SlackAgent
 
 # CoinGecko asset ids that will be monitored by the script
 SYMBOLS = os.environ['SYMBOLS'].split(",")
