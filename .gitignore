@@ -1,0 +1,7 @@
+api-testing.ipynb
+__pycache__
+.history
+.ipynb_checkpoints
+.vscode
+venv
+.env

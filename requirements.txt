@@ -1,0 +1,12 @@
+python-dotenv
+slackclient
+certifi
+charset-normalizer
+idna==3.3
+kucoin-python
+numpy
+pandas
+python-dateutil
+websockets
+aiohttp
+PyYAML
