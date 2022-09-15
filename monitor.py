@@ -147,14 +147,14 @@ class CryptoMonitor:
                 self._append_csv(df_stats.iloc[-1:, :])
                 
             if (
-                datetime.datetime.now().strftime("%H:%M") == "19:05"
+                datetime.datetime.now().strftime("%H:%M") == "00:00"
                 and not self.is_deleted
             ):
                 self.SlackAgentInstance.delete_messages(channel=self.slack_channel)
                 self.is_deleted = True
                 is_start = True
 
-            elif datetime.datetime.now().strftime("%H:%M") == "19:06":
+            elif datetime.datetime.now().strftime("%H:%M") == "00:01":
                 self.is_deleted = False
                 sleep(self.loop_time_sleep)
 
