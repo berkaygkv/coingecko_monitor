@@ -5,6 +5,8 @@ from time import sleep
 import os
 from slack_api import SlackAgent
 
+pd.options.display.max_columns = None
+
 # CoinGecko asset ids that will be monitored by the script
 SYMBOLS = os.environ['SYMBOLS'].split(",")
 
@@ -84,7 +86,7 @@ class CryptoMonitor:
             print(" - " * 10)           
             last_min_stats.index.name = None
             last_min_stats.index = last_min_stats.index.str.upper()
-            entry_edit = last_min_stats.to_string() + '\n' + '@berkaygokova'
+            entry_edit = last_min_stats[["pct_change"]].to_string() + '\n' + '@berkaygokova'
             self.SlackAgentInstance.send_alert(text=entry_edit, channel=self.slack_channel)
 
     def start_monitor(self):
