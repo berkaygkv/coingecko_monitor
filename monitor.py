@@ -106,10 +106,10 @@ class CryptoMonitor:
         return df_stats
 
     def filter_anomalies(self, df_stats):
-        last_min = df_stats.iloc[-1, :]["pct_change"].abs()
+        last_min = df_stats.iloc[-1, :]["pct_change"]
         now_date = self.df_main.iloc[-1].name
         last_min_stats = last_min.loc[
-            (last_min > self.THRESHOLD)
+            (last_min.abs() > self.THRESHOLD)
             & (
                 df_stats.rolling(self.alert_repeat_cycle_sec)
                 .is_checked.max()
@@ -117,13 +117,39 @@ class CryptoMonitor:
                 == 0
             )
         ]
+
+        last_hour = df_stats.iloc[-1, :]["price_change_percentage_1h_in_currency"]
+        last_hour_stats = last_hour.loc[
+            (last_hour.abs() > self.THRESHOLD)
+            & (
+                df_stats.rolling(10 * 2 * 60)
+                .is_checked.max()
+                .iloc[-1, :]
+                == 0
+            )
+        ]
+
         if last_min_stats.shape[0] > 0:
             print(last_min_stats.tail())
+            last_min_stats = last_min_stats.map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
+
             self.df_main.loc[now_date, ("is_checked", last_min_stats.index)] = True
             print(" - " * 10)
             last_min_stats.index.name = None
             last_min_stats.index = last_min_stats.index.str.upper()
-            entry_edit = last_min_stats.to_string() + "\n" + "@berkaygokova"
+            entry_edit = "*SON 5 DAKİKADA*\n" + last_min_stats.to_string() + "\n" + "@berkaygokova"
+            self.SlackAgentInstance.send_alert(
+                text=entry_edit, channel=self.slack_channel
+            )
+
+        elif last_hour_stats.shape[0] > 0:
+            print(last_hour_stats.tail())
+            last_hour_stats = last_hour_stats.map(lambda x: f"%{round(abs(x), 1)} düştü :arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı :arrow_up:")
+            self.df_main.loc[now_date, ("is_checked", last_hour_stats.index)] = True
+            print(" - " * 10)
+            last_hour_stats.index.name = None
+            last_hour_stats.index = last_hour_stats.index.str.upper()
+            entry_edit = "*SON 1 SAATTE*\n" + last_hour_stats.to_string() + "\n" + "@berkaygokova"
             self.SlackAgentInstance.send_alert(
                 text=entry_edit, channel=self.slack_channel
             )
@@ -138,7 +164,7 @@ class CryptoMonitor:
             df_stats = self.calculate_stats()
             if df_stats.shape[0] > 0:
                 self.filter_anomalies(df_stats)
-            print(df_stats[["pct_change", "is_checked"]])
+            print(self.df_main.iloc[-1].name.strftime("%m-%d %H:%M:%S"))
 
             if is_start:
                 self._create_temporal_csv_file(df_stats)
