@@ -43,7 +43,8 @@ class CryptoMonitor:
             "date",
             "price_change_percentage_1h_in_currency",
             "total_volume",
-            "is_checked",
+            "is_checked_last_min",
+            "is_checked_last_hour"
         ]
         self.url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={self.symbol_ids}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h"
         self.df_main = pd.DataFrame()
@@ -77,7 +78,8 @@ class CryptoMonitor:
     def process_data(self, response):
         df = pd.DataFrame(response)
         df["date"] = datetime.datetime.now()
-        df["is_checked"] = False
+        df["is_checked_min"] = False
+        df["is_checked_hour"] = False
         price = df[self.used_columns].pivot(index="date", columns="symbol")
         price.columns.name = None
         return price
@@ -112,7 +114,7 @@ class CryptoMonitor:
             (last_min.abs() > self.THRESHOLD)
             & (
                 df_stats.rolling(self.alert_repeat_cycle_sec)
-                .is_checked.max()
+                .is_checked_last_min.max()
                 .iloc[-1, :]
                 == 0
             )
@@ -123,7 +125,7 @@ class CryptoMonitor:
             (last_hour.abs() > self.THRESHOLD)
             & (
                 df_stats.rolling(10 * 2 * 60)
-                .is_checked.max()
+                .is_checked_last_hour.max()
                 .iloc[-1, :]
                 == 0
             )
@@ -132,8 +134,7 @@ class CryptoMonitor:
         if last_min_stats.shape[0] > 0:
             print(last_min_stats.tail())
             last_min_stats = last_min_stats.map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
-
-            self.df_main.loc[now_date, ("is_checked", last_min_stats.index)] = True
+            self.df_main.loc[now_date, ("is_checked_last_min", last_min_stats.index)] = True
             print(" - " * 10)
             last_min_stats.index.name = None
             last_min_stats.index = last_min_stats.index.str.upper()
@@ -145,7 +146,7 @@ class CryptoMonitor:
         elif last_hour_stats.shape[0] > 0:
             print(last_hour_stats.tail())
             last_hour_stats = last_hour_stats.map(lambda x: f"%{round(abs(x), 1)} düştü :arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı :arrow_up:")
-            self.df_main.loc[now_date, ("is_checked", last_hour_stats.index)] = True
+            self.df_main.loc[now_date, ("is_checked_last_hour", last_hour_stats.index)] = True
             print(" - " * 10)
             last_hour_stats.index.name = None
             last_hour_stats.index = last_hour_stats.index.str.upper()
@@ -153,6 +154,8 @@ class CryptoMonitor:
             self.SlackAgentInstance.send_alert(
                 text=entry_edit, channel=self.slack_channel
             )
+
+            
 
     def start_monitor(self):
         print("start df: ", self.df_main)
