@@ -78,8 +78,8 @@ class CryptoMonitor:
     def process_data(self, response):
         df = pd.DataFrame(response)
         df["date"] = datetime.datetime.now()
-        df["is_checked_min"] = False
-        df["is_checked_hour"] = False
+        df["is_checked_last_min"] = False
+        df["is_checked_last_hour"] = False
         price = df[self.used_columns].pivot(index="date", columns="symbol")
         price.columns.name = None
         return price
