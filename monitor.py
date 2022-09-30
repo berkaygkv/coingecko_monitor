@@ -3,15 +3,15 @@ import pandas as pd
 import datetime
 from time import sleep
 import os
-from slack_api import SlackAgent
-import csv
+from monitor_app.slack_api import SlackAgent
+from monitor_app.exceptions import InputError
 
 pd.options.display.max_columns = None
 
 # Temporal CSV file
 TEMPORAL_FILE_NAME = "temporal_file.csv"
 
-# CoinGecko asset ids that will be monitored by the script
+# CoinGecko asset ids that will be monitored by the script ("id" field must be provided)
 SYMBOLS = os.environ["SYMBOLS"].split(",")
 
 # Threshold value after which an alert message will be sent
@@ -48,6 +48,7 @@ class CryptoMonitor:
         ]
         self.url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={self.symbol_ids}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h"
         self.df_main = pd.DataFrame()
+
 
     def _check_data_size(self):
         size = self.df_main.shape[0]
@@ -164,6 +165,7 @@ class CryptoMonitor:
             if self._check_data_size():
                 self._remove_first_row()
             self.concatenate_response()
+            assert len(SYMBOLS) == len(self.df_main["current_price"].columns.tolist()), InputError("One of the symbols could not be found")
             df_stats = self.calculate_stats()
             if df_stats.shape[0] > 0:
                 self.filter_anomalies(df_stats)
@@ -192,5 +194,6 @@ class CryptoMonitor:
 
 
 if __name__ == "__main__":
+    print(SYMBOLS)
     monitor_instance = CryptoMonitor(SYMBOLS)
     monitor_instance.start_monitor()
