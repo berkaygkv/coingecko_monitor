@@ -139,7 +139,7 @@ class CryptoMonitor:
             print(" - " * 10)
             last_min_stats.index.name = None
             last_min_stats.index = last_min_stats.index.str.upper()
-            entry_edit = "*SON 5 DAKİKADA*\n" + last_min_stats.to_string() + "\n" + "@berkaygokova"
+            entry_edit = "*SON 5 DAKİKADA*\n" + last_min_stats.to_string() + "\n" + " - " * 15
             self.SlackAgentInstance.send_alert(
                 text=entry_edit, channel=self.slack_channel
             )
@@ -151,7 +151,7 @@ class CryptoMonitor:
             print(" - " * 10)
             last_hour_stats.index.name = None
             last_hour_stats.index = last_hour_stats.index.str.upper()
-            entry_edit = "*SON 1 SAATTE*\n" + last_hour_stats.to_string() + "\n" + "@berkaygokova"
+            entry_edit = "*SON 1 SAATTE*\n" + last_hour_stats.to_string() + "\n" + " - " * 15
             self.SlackAgentInstance.send_alert(
                 text=entry_edit, channel=self.slack_channel
             )
