@@ -36,7 +36,7 @@ class CryptoMonitor:
 
         self.loop_time_sleep = 3
         self.rolling_window = int(LOOKBACK_MINUTES * (60 / self.loop_time_sleep))
-        self.total_row_limit = self.rolling_window * 2
+        self.total_row_limit = 1500 # self.rolling_window * 2
         self.used_columns = [
             "symbol",
             "current_price",
