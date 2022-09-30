@@ -6,3 +6,5 @@ __pycache__
 venv
 .env
 *.csv
+delete_messages.py
+heroku_cli.py
