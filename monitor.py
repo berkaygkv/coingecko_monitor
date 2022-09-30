@@ -165,11 +165,16 @@ class CryptoMonitor:
             if self._check_data_size():
                 self._remove_first_row()
             self.concatenate_response()
+            if is_start:
+                found_columns = self.df_main["current_price"].columns.str.upper().tolist()
+                print(f"Following symbols were succesfully found in the API:\n{' - ' * 20}\n",
+                    ", ".join(found_columns),
+                    f"with length of {len(found_columns)} symbols in total.\n{' - ' * 20}\n")
             assert len(SYMBOLS) == len(self.df_main["current_price"].columns.tolist()), InputError("One of the symbols could not be found")
             df_stats = self.calculate_stats()
             if df_stats.shape[0] > 0:
                 self.filter_anomalies(df_stats)
-            print(self.df_main.iloc[-1].name.strftime("%m-%d %H:%M:%S"))
+            #print(self.df_main.iloc[-1].name.strftime("%m-%d %H:%M:%S"))
 
             if is_start:
                 self._create_temporal_csv_file(df_stats)
@@ -192,8 +197,9 @@ class CryptoMonitor:
             else:
                 sleep(self.loop_time_sleep)
 
+            
+
 
 if __name__ == "__main__":
-    print(SYMBOLS)
     monitor_instance = CryptoMonitor(SYMBOLS)
     monitor_instance.start_monitor()
