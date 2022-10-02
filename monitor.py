@@ -99,7 +99,7 @@ class CryptoMonitor:
         )
         df_stats = pd.concat([self.df_main, mean], axis=1)
         pct_change = df_stats.apply(
-            lambda x: (x["current_price"] - x["mean"]).abs() / x["mean"] * 100, axis=1
+            lambda x: (x["current_price"] - x["mean"]) / x["mean"] * 100, axis=1
         )
         pct_change.columns = pd.MultiIndex.from_product(
             [["pct_change"], self.df_main["current_price"]]
