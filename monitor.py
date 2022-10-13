@@ -44,7 +44,8 @@ class CryptoMonitor:
             "price_change_percentage_1h_in_currency",
             "total_volume",
             "is_checked_last_min",
-            "is_checked_last_hour"
+            "is_checked_last_hour",
+            "last_updated"
         ]
         self.url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={self.symbol_ids}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h"
         self.df_main = pd.DataFrame()
@@ -151,10 +152,10 @@ class CryptoMonitor:
             print(" - " * 10)
             last_hour_stats.index.name = None
             last_hour_stats.index = last_hour_stats.index.str.upper()
-            entry_edit = "*SON 1 SAATTE*\n" + last_hour_stats.to_string() + "\n" + " - " * 15
-            self.SlackAgentInstance.send_alert(
-                text=entry_edit, channel=self.slack_channel
-            )
+            entry_edit = ":right_anger_bubble:*In the last hour:*\n" + last_hour_stats.to_string() + "\n" + " - " * 15
+            # self.SlackAgentInstance.send_alert(
+            #     text=entry_edit, channel=self.slack_channel
+            # )
 
             
 
