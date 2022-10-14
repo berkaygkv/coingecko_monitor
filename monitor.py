@@ -5,6 +5,8 @@ from time import sleep
 import os
 from monitor_app.slack_api import SlackAgent
 from monitor_app.exceptions import InputError
+from monitor_app.selenium_monitor import SeleniumMonitor
+
 
 pd.options.display.max_columns = None
 
@@ -47,7 +49,7 @@ class CryptoMonitor:
             "is_checked_last_hour",
             "last_updated"
         ]
-        self.url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={self.symbol_ids}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h"
+        self.url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids={self.symbol_ids}&order=gecko_asc&sparkline=false&price_change_percentage=1h"
         self.df_main = pd.DataFrame()
 
 
@@ -141,9 +143,9 @@ class CryptoMonitor:
             last_min_stats.index.name = None
             last_min_stats.index = last_min_stats.index.str.upper()
             entry_edit = "*SON 5 DAKİKADA*\n" + last_min_stats.to_string() + "\n" + " - " * 15
-            self.SlackAgentInstance.send_alert(
-                text=entry_edit, channel=self.slack_channel
-            )
+            # self.SlackAgentInstance.send_alert(
+            #     text=entry_edit, channel=self.slack_channel
+            # )
 
         elif last_hour_stats.shape[0] > 0:
             print(last_hour_stats.tail())
@@ -202,5 +204,8 @@ class CryptoMonitor:
 
 
 if __name__ == "__main__":
-    monitor_instance = CryptoMonitor(SYMBOLS)
-    monitor_instance.start_monitor()
+    # monitor_instance = CryptoMonitor(SYMBOLS)
+    # monitor_instance.start_monitor()
+    monitor_obj = SeleniumMonitor(threshold=THRESHOLD)
+    monitor_obj.start_monitoring()
+
