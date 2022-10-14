@@ -92,7 +92,7 @@ class SeleniumMonitor(webdriver.Chrome):
             )
 
     def start_monitoring(self):
-
+        print("Monitoring Started")
         while True:
             try:
                 df = self.read_table()
