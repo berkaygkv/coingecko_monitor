@@ -99,6 +99,7 @@ class SeleniumMonitor(webdriver.Chrome):
                 _ = self.calculate_stats(df, threshold=self.threshold)
                 time.sleep(3)
             except StaleElementReferenceException:
+                pass
 
 
 
