@@ -27,7 +27,7 @@ class SeleniumMonitor(webdriver.Chrome):
 
         options.add_argument(f'--profile-directory={user_profile}')
         options.add_argument("--remote-debugging-port=9222")
-        super(SeleniumMonitor, self).__init__("/Users/berkayg/Codes/chromedriver", options=options)
+        super(SeleniumMonitor, self).__init__("/app/.chromedriver/bin/chromedriver", options=options)
         self.get("https://www.tradingview.com/crypto-screener/")
         time.sleep(5)
         self._add_cookie()
