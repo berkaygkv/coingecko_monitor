@@ -13,7 +13,7 @@ class SeleniumMonitor(webdriver.Chrome):
         self.SlackAgentInstance = SlackAgent()
         self.threshold = threshold
         self.minute_cooldown = datetime.datetime.now() - datetime.timedelta(minutes=6)
-        self.hourly_cooldown = datetime.datetime.now() - datetime.timedelta(minutes=6)
+        self.hourly_cooldown = datetime.datetime.now() - datetime.timedelta(hours=1, minutes=1)
 
         options = webdriver.ChromeOptions()
         user_profile = "/Users/berkayg/Codes/testing/custom_chrome_profile/Default"
