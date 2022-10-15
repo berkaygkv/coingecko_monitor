@@ -39,6 +39,8 @@ class SeleniumMonitor(webdriver.Chrome):
         options.add_argument("--disable-extensions")
         options.add_argument("--dns-prefetch-disable")
         options.add_argument("--disable-gpu")
+        prefs = {"profile.managed_default_content_settings.images": 2}
+        options.add_experimental_option("prefs", prefs)
         super(SeleniumMonitor, self).__init__("/app/.chromedriver/bin/chromedriver", options=options)
         self.get("https://www.tradingview.com/crypto-screener/")
         time.sleep(5)
