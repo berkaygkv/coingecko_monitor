@@ -76,7 +76,7 @@ class SeleniumMonitor(webdriver.Chrome):
             value_dict.update(value)
 
         df = pd.DataFrame(value_dict, index=["price", "change_1h", "change_5min"]).T
-        df = df.applymap(lambda x: float(x.strip().replace("%", "").replace("−", "")))
+        df = df.applymap(lambda x: float(x.strip().replace("%", "").replace("−", "-")))
         return df
 
     def calculate_stats(self, df, threshold=5):
