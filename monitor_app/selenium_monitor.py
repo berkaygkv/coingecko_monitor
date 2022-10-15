@@ -34,7 +34,7 @@ class SeleniumMonitor(webdriver.Chrome):
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--no-sandbox")
-        options.add_argument("--window-size=1280,1080")
+        options.add_argument("--window-size=1920,1080")
         options.add_argument(f"--user-agent={user_agent}")
         options.add_argument("--disable-extensions")
         options.add_argument("--dns-prefetch-disable")
@@ -83,7 +83,6 @@ class SeleniumMonitor(webdriver.Chrome):
             last_5_min = last_5_min.map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
             entry_edit = ":right_anger_bubble:*SON 5 DAKİKADA*\n" + last_5_min.to_string() + "\n" + " - " * 15
             self.minute_cooldown = datetime.datetime.now()
-            print(df)
             print(self.minute_cooldown)
             print(entry_edit)
 
@@ -96,7 +95,6 @@ class SeleniumMonitor(webdriver.Chrome):
             last_1_hour = last_1_hour.map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
             entry_edit = ":right_anger_bubble:*SON 1 SAATTE*\n" + last_1_hour.to_string() + "\n" + " - " * 15
             self.hourly_cooldown = datetime.datetime.now()
-            print(df)
             print(self.hourly_cooldown)
             print(entry_edit)
             self.SlackAgentInstance.send_alert(
@@ -108,6 +106,7 @@ class SeleniumMonitor(webdriver.Chrome):
         while True:
             try:
                 df = self.read_table()
+                print(df)
                 _ = self.calculate_stats(df, threshold=self.threshold)
                 time.sleep(3)
             except StaleElementReferenceException:
