@@ -5,11 +5,12 @@ import time
 import pandas as pd
 import pickle
 from selenium.common.exceptions import StaleElementReferenceException
+from monitor_app.slack_api import SlackAgent
 
 
 class SeleniumMonitor(webdriver.Chrome):
     def __init__(self, threshold) -> None:
-
+        self.SlackAgentInstance = SlackAgent()
         self.threshold = threshold
         self.minute_cooldown = datetime.datetime.now() - datetime.timedelta(minutes=6)
         self.hourly_cooldown = datetime.datetime.now() - datetime.timedelta(minutes=6)
