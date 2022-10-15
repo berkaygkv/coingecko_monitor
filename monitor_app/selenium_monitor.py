@@ -9,7 +9,7 @@ from monitor_app.slack_api import SlackAgent
 
 
 class SeleniumMonitor(webdriver.Chrome):
-    def __init__(self, threshold) -> None:
+    def __init__(self, threshold, executable_path) -> None:
         self.instance_started = True
         self.SlackAgentInstance = SlackAgent()
         self.slack_channel = "coingecko"
@@ -44,8 +44,7 @@ class SeleniumMonitor(webdriver.Chrome):
         options.add_argument("--disable-gpu")
         prefs = {"profile.managed_default_content_settings.images": 2}
         options.add_experimental_option("prefs", prefs)
-        #super(SeleniumMonitor, self).__init__("/app/.chromedriver/bin/chromedriver", options=options)
-        super(SeleniumMonitor, self).__init__("/Users/berkayg/Codes/chromedriver", options=options)
+        super(SeleniumMonitor, self).__init__(executable_path=executable_path, options=options)
         self.get("https://www.tradingview.com/crypto-screener/")
         time.sleep(5)
         self._add_cookie()

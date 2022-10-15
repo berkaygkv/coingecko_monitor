@@ -26,6 +26,9 @@ LOOKBACK_MINUTES = int(os.environ["LOOKBACK_MINUTES"])
 # Send the alert every <ALERT_REPEAT_CYCLE_FREQ> sencods.
 ALERT_REPEAT_CYCLE_FREQ = int(os.environ["ALERT_REPEAT_CYCLE_FREQ"])
 
+# chromedriver.exe path
+CHROME_EXE_PATH = os.environ["CHROME_EXE_PATH"]
+
 
 class CryptoMonitor:
     def __init__(self, symbols):
@@ -206,6 +209,6 @@ class CryptoMonitor:
 if __name__ == "__main__":
     # monitor_instance = CryptoMonitor(SYMBOLS)
     # monitor_instance.start_monitor()
-    monitor_obj = SeleniumMonitor(threshold=THRESHOLD)
+    monitor_obj = SeleniumMonitor(threshold=THRESHOLD, executable_path=CHROME_EXE_PATH)
     monitor_obj.start_monitoring()
 
