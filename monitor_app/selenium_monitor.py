@@ -34,12 +34,10 @@ class SeleniumMonitor(webdriver.Chrome):
                                         "enable-automation", "ignore-certificate-errors", "enable-logging"])
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-blink-features=AutomationControlled")
-        options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--no-sandbox")
-        options.add_argument("--window-size=2440,1440")
+        options.add_argument("--window-size=800,600")
         options.add_argument(f"--user-agent={user_agent}")
         options.add_argument("--disable-extensions")
-        options.add_argument("--dns-prefetch-disable")
         options.add_argument("--disable-gpu")
         prefs = {"profile.managed_default_content_settings.images": 2}
         options.add_experimental_option("prefs", prefs)
@@ -86,8 +84,8 @@ class SeleniumMonitor(webdriver.Chrome):
 
     def calculate_stats(self, df, threshold=5):
         now = datetime.datetime.now()
-        last_5_min = df.loc[df["change_5min"] > threshold, "change_5min"]
-        last_1_hour = df.loc[df["change_1h"] > threshold, "change_1h"]
+        last_5_min = df.loc[df["change_5min"].abs() > threshold, "change_5min"]
+        last_1_hour = df.loc[df["change_1h"].abs() > threshold, "change_1h"]
         df_timing_5_min = last_5_min.to_frame().merge(self.df_timing[["5min_cooldown"]], left_index=True, right_index=True, how="left")
         df_timing_1_hour = last_1_hour.to_frame().merge(self.df_timing[["1h_cooldown"]], left_index=True, right_index=True, how="left")
 
