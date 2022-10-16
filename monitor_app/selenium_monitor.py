@@ -87,7 +87,7 @@ class SeleniumMonitor(webdriver.Chrome):
 
     def calculate_stats(self, df, threshold=5):
         now = datetime.datetime.now(tz=pytz.UTC).astimezone(self.timezone)
-        if not now > now.replace(second=0, hour=1, minute=30):
+        if not now > now.replace(second=0, hour=1, minute=30) and not now < now.replace(second=0, hour=6, minute=0):
             last_5_min = df.loc[df["change_5min"].abs() > threshold, "change_5min"]
             last_1_hour = df.loc[df["change_1h"].abs() > threshold, "change_1h"]
             df_timing_5_min = last_5_min.to_frame().merge(self.df_timing[["5min_cooldown"]], left_index=True, right_index=True, how="left")
