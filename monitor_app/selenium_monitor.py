@@ -104,6 +104,7 @@ class SeleniumMonitor(webdriver.Chrome):
             last_5_min_table = last_5_min_table["change_5min"].map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
             entry_edit = ":right_anger_bubble:*SON 5 DAKİKADA*\n" + last_5_min_table.to_string() + "\n" + " - " * 15
             new_minute_cooldown = datetime.datetime.now()
+            new_hourly_cooldown = datetime.datetime.now()
             self.df_timing.loc[last_5_min_table.index, "5min_cooldown"] = new_minute_cooldown
             self.df_timing.loc[last_1_hour_table.index, "1h_cooldown"] = new_hourly_cooldown
             print(entry_edit)
@@ -116,6 +117,7 @@ class SeleniumMonitor(webdriver.Chrome):
             last_1_hour_table = last_1_hour_table["change_1h"].map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
             entry_edit = ":right_anger_bubble:*SON 1 SAATTE*\n" + last_1_hour_table.to_string() + "\n" + " - " * 15
             new_hourly_cooldown = datetime.datetime.now()
+            new_minute_cooldown = datetime.datetime.now()
             self.df_timing.loc[last_1_hour_table.index, "1h_cooldown"] = new_hourly_cooldown
             self.df_timing.loc[last_5_min_table.index, "5min_cooldown"] = new_minute_cooldown
             print(entry_edit)
