@@ -6,16 +6,19 @@ import pandas as pd
 import pickle
 from selenium.common.exceptions import StaleElementReferenceException
 from monitor_app.slack_api import SlackAgent
+import pytz
 
 
 class SeleniumMonitor(webdriver.Chrome):
     def __init__(self, threshold, executable_path) -> None:
         self.instance_started = True
+        self.is_deleted = False
         self.SlackAgentInstance = SlackAgent()
         self.slack_channel = "coingecko"
+        self.timezone = pytz.timezone("Europe/Istanbul")
         self.threshold = threshold
-        self.minute_cooldown = datetime.datetime.now() - datetime.timedelta(minutes=6)
-        self.hourly_cooldown = datetime.datetime.now() - datetime.timedelta(hours=1, minutes=1)
+        self.minute_cooldown = datetime.datetime.now(tz=pytz.UTC).astimezone(self.timezone) - datetime.timedelta(minutes=6)
+        self.hourly_cooldown = datetime.datetime.now(tz=pytz.UTC).astimezone(self.timezone) - datetime.timedelta(hours=1, minutes=1)
 
         options = webdriver.ChromeOptions()
         user_profile = "/Users/berkayg/Codes/testing/custom_chrome_profile/Default"
@@ -83,45 +86,55 @@ class SeleniumMonitor(webdriver.Chrome):
         return df
 
     def calculate_stats(self, df, threshold=5):
-        now = datetime.datetime.now()
-        last_5_min = df.loc[df["change_5min"].abs() > threshold, "change_5min"]
-        last_1_hour = df.loc[df["change_1h"].abs() > threshold, "change_1h"]
-        df_timing_5_min = last_5_min.to_frame().merge(self.df_timing[["5min_cooldown"]], left_index=True, right_index=True, how="left")
-        df_timing_1_hour = last_1_hour.to_frame().merge(self.df_timing[["1h_cooldown"]], left_index=True, right_index=True, how="left")
+        now = datetime.datetime.now(tz=pytz.UTC).astimezone(self.timezone)
+        if not now > now.replace(second=0, hour=1, minute=30):
+            last_5_min = df.loc[df["change_5min"].abs() > threshold, "change_5min"]
+            last_1_hour = df.loc[df["change_1h"].abs() > threshold, "change_1h"]
+            df_timing_5_min = last_5_min.to_frame().merge(self.df_timing[["5min_cooldown"]], left_index=True, right_index=True, how="left")
+            df_timing_1_hour = last_1_hour.to_frame().merge(self.df_timing[["1h_cooldown"]], left_index=True, right_index=True, how="left")
 
-        df_timing_5_min["5min_cooldown"] = (now - df_timing_5_min["5min_cooldown"]).dt.total_seconds()
-        df_timing_5_min["5min_cooldown"] = df_timing_5_min["5min_cooldown"] >= (60 * 5) + 15
+            df_timing_5_min["5min_cooldown"] = (now - df_timing_5_min["5min_cooldown"]).dt.total_seconds()
+            df_timing_5_min["5min_cooldown"] = df_timing_5_min["5min_cooldown"] >= (60 * 5) + 15
 
-        df_timing_1_hour["1h_cooldown"] = (now - df_timing_1_hour["1h_cooldown"]).dt.total_seconds()
-        df_timing_1_hour["1h_cooldown"] = df_timing_1_hour["1h_cooldown"] >= (60 * 60) + 15
+            df_timing_1_hour["1h_cooldown"] = (now - df_timing_1_hour["1h_cooldown"]).dt.total_seconds()
+            df_timing_1_hour["1h_cooldown"] = df_timing_1_hour["1h_cooldown"] >= (60 * 60) + 15
 
-        last_5_min_table = df_timing_5_min.loc[(df_timing_5_min["change_5min"].abs() > threshold) & (df_timing_5_min["5min_cooldown"])]
-        last_1_hour_table = df_timing_1_hour.loc[(df_timing_1_hour["change_1h"].abs() > threshold) & (df_timing_1_hour["1h_cooldown"])]
+            last_5_min_table = df_timing_5_min.loc[(df_timing_5_min["change_5min"].abs() > threshold) & (df_timing_5_min["5min_cooldown"])]
+            last_1_hour_table = df_timing_1_hour.loc[(df_timing_1_hour["change_1h"].abs() > threshold) & (df_timing_1_hour["1h_cooldown"])]
 
-        if last_5_min_table.shape[0] > 0 :
-            last_5_min_table = last_5_min_table["change_5min"].map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
-            entry_edit = ":right_anger_bubble:*SON 5 DAKİKADA*\n" + last_5_min_table.to_string() + "\n" + " - " * 15
-            new_minute_cooldown = datetime.datetime.now()
-            new_hourly_cooldown = datetime.datetime.now()
-            self.df_timing.loc[last_5_min_table.index, "5min_cooldown"] = new_minute_cooldown
-            self.df_timing.loc[last_5_min_table.index, "1h_cooldown"] = new_hourly_cooldown
-            print(entry_edit)
-            self.SlackAgentInstance.send_alert(
-                text=entry_edit, channel=self.slack_channel
-            )
+            if last_5_min_table.shape[0] > 0 :
+                last_5_min_table = last_5_min_table["change_5min"].map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
+                entry_edit = ":right_anger_bubble:*SON 5 DAKİKADA*\n" + last_5_min_table.to_string() + "\n" + " - " * 15
+                new_minute_cooldown = datetime.datetime.now(tz=pytz.UTC).astimezone(self.timezone)
+                new_hourly_cooldown = datetime.datetime.now(tz=pytz.UTC).astimezone(self.timezone)
+                self.df_timing.loc[last_5_min_table.index, "5min_cooldown"] = new_minute_cooldown
+                self.df_timing.loc[last_5_min_table.index, "1h_cooldown"] = new_hourly_cooldown
+                print(entry_edit)
+                self.SlackAgentInstance.send_alert(
+                    text=entry_edit, channel=self.slack_channel
+                )
+                
+
+            elif last_1_hour_table.shape[0] > 0:
+                last_1_hour_table = last_1_hour_table["change_1h"].map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
+                entry_edit = ":right_anger_bubble:*SON 1 SAATTE*\n" + last_1_hour_table.to_string() + "\n" + " - " * 15
+                new_hourly_cooldown = datetime.datetime.now(tz=pytz.UTC).astimezone(self.timezone)
+                new_minute_cooldown = datetime.datetime.now(tz=pytz.UTC).astimezone(self.timezone)
+                self.df_timing.loc[last_1_hour_table.index, "1h_cooldown"] = new_hourly_cooldown
+                self.df_timing.loc[last_1_hour_table.index, "5min_cooldown"] = new_minute_cooldown
+                print(entry_edit)
+                self.SlackAgentInstance.send_alert(
+                    text=entry_edit, channel=self.slack_channel
+                )
+            self.is_deleted = False
             
-
-        elif last_1_hour_table.shape[0] > 0:
-            last_1_hour_table = last_1_hour_table["change_1h"].map(lambda x: f"%{round(abs(x), 1)} düştü:arrow_down:" if max(0, x) == 0 else f"%{round(abs(x), 1)} arttı:arrow_up:")
-            entry_edit = ":right_anger_bubble:*SON 1 SAATTE*\n" + last_1_hour_table.to_string() + "\n" + " - " * 15
-            new_hourly_cooldown = datetime.datetime.now()
-            new_minute_cooldown = datetime.datetime.now()
-            self.df_timing.loc[last_1_hour_table.index, "1h_cooldown"] = new_hourly_cooldown
-            self.df_timing.loc[last_1_hour_table.index, "5min_cooldown"] = new_minute_cooldown
-            print(entry_edit)
-            self.SlackAgentInstance.send_alert(
-                text=entry_edit, channel=self.slack_channel
-            )
+        elif not self.is_deleted:
+            self.SlackAgentInstance.delete_messages(channel=self.slack_channel)
+            self.is_deleted = True
+        
+        else:
+            pass
+            
 
     def start_monitoring(self):
         print("Monitoring Started")
