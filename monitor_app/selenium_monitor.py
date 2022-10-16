@@ -27,7 +27,7 @@ class SeleniumMonitor(webdriver.Chrome):
         options.add_argument(f"--user-agent={user_agent}")
 
         options.add_argument(f'--profile-directory={user_profile}')
-        options.add_argument("--remote-debugging-port=9222")
+        # options.add_argument("--remote-debugging-port=9222")
 
         options.add_experimental_option('useAutomationExtension', False)
         options.add_experimental_option("excludeSwitches", [
