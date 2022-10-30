@@ -8,3 +8,4 @@ venv
 *.csv
 delete_messages.py
 heroku_cli.py
+heroku_config.txt
