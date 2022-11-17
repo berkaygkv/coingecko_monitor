@@ -9,3 +9,8 @@ venv
 delete_messages.py
 heroku_cli.py
 heroku_config.txt
+dags
+request_parameters.json
+cookies.pkl
+diagnostics
+docs
