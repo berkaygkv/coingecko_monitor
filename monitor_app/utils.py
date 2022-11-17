@@ -17,7 +17,7 @@ class Configs:
     """ Dataclass that holds configs values
     """
     # .env file values
-    THRESHOLD = os.environ["THRESHOLD"]
+    THRESHOLD = float(os.environ["THRESHOLD"])
 
     # Constant variables
     scan_url = "https://scanner.tradingview.com/crypto/scan"
@@ -46,7 +46,7 @@ class UtilsManager(Configs):
     Args:
         Configs (_type_): Configs Object that holds program configurations
     """
-    
+
     @staticmethod
     def calculate_stats(df, df_timing, threshold):
         now = datetime.datetime.now(tz=pytz.UTC).astimezone(Configs.timezone)

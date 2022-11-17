@@ -12,3 +12,4 @@ aiohttp
 PyYAML
 jmespath
 selenium
+webdriver-manager
