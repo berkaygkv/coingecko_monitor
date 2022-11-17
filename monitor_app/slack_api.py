@@ -4,9 +4,8 @@ from pathlib import Path
 from time import sleep
 import jmespath
 
-if Path.home().stem == "berkayg":
-    from dotenv import load_dotenv
-    load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # Slack Bot Token
 BOT_TOKEN = os.environ['BOT_TOKEN']
@@ -19,9 +18,11 @@ class BotAgent(slack.WebClient):
     def __init__(self) -> None:
         super().__init__(token=BOT_TOKEN)
 
+
 class UserAgent(slack.WebClient):
     def __init__(self) -> None:
         super().__init__(token=USER_TOKEN)
+
 
 class SlackAgent(BotAgent, UserAgent):
     def __init__(self) -> None:
@@ -29,7 +30,7 @@ class SlackAgent(BotAgent, UserAgent):
         UserAgent().__init__()
 
     def send_alert(self, text, channel):
-        _ = BotAgent().chat_postMessage(channel='#'+channel, text=text, link_names = 1)
+        _ = BotAgent().chat_postMessage(channel='#'+channel, text=text, link_names=1)
 
     def list_channels(self):
         conversations_data = BotAgent().conversations_list().data
@@ -51,10 +52,11 @@ class SlackAgent(BotAgent, UserAgent):
                     pass
                 sleep(0.2)
             print(number_of_deleted_messages, " messages deleted.")
-            
+
         else:
             raise TypeError("Channel not found.")
-        
+
+
 if __name__ == "__main__":
     Agent = SlackAgent()
     #Agent.send_alert(text="deneme2", channel="upwork")
