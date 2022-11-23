@@ -37,4 +37,5 @@ def run_monitor():
 
 
 if __name__ == "__main__":
-    run_request_monitoring()
+    monitor = RequestMonitor()
+    monitor.run_request_monitoring()

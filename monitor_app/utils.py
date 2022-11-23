@@ -7,9 +7,23 @@ import pytz
 from dotenv import load_dotenv
 
 from .slack_api import SlackAgent
+import logging
 
 # Enable .env file values
 load_dotenv()
+
+class Logger:
+    @staticmethod
+    def configure():
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)
+        file_handler = logging.FileHandler('logs/main.log')
+        formatter = logging.Formatter(
+            '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
+        file_handler.setFormatter(formatter)
+        # add file handler to logger
+        logger.addHandler(file_handler)
+        Logger.logger = logger
 
 
 @dataclass
@@ -48,10 +62,8 @@ class UtilsManager(Configs):
     """
 
     @staticmethod
-    def calculate_stats(df, df_timing, threshold):
+    def calculate_stats(df, df_timing, threshold, enable_notification=False):
         now = datetime.datetime.now(tz=pytz.UTC).astimezone(Configs.timezone)
-        print(now)
-        print(df)
         if not (now > now.replace(second=0, hour=1, minute=30) and now < now.replace(second=5, hour=1, minute=30)):
             last_5_min = df.loc[df["change_5min"].abs() > threshold, "change_5min"]
             last_1_hour = df.loc[df["change_1h"].abs() > threshold, "change_1h"]
@@ -73,9 +85,10 @@ class UtilsManager(Configs):
                 df_timing.loc[last_5_min_table.index, "5min_cooldown"] = new_minute_cooldown
                 df_timing.loc[last_5_min_table.index, "1h_cooldown"] = new_hourly_cooldown
                 print(entry_edit)
-                # Configs.SlackAgentInstance.send_alert(
-                #     text=entry_edit, channel=Configs.slack_channel
-                # )
+                if enable_notification:
+                    Configs.SlackAgentInstance.send_alert(
+                        text=entry_edit, channel=Configs.slack_channel
+                    )
 
             elif last_1_hour_table.shape[0] > 0:
                 last_1_hour_table = last_1_hour_table["change_1h"].map(
@@ -86,9 +99,10 @@ class UtilsManager(Configs):
                 df_timing.loc[last_1_hour_table.index, "1h_cooldown"] = new_hourly_cooldown
                 df_timing.loc[last_1_hour_table.index, "5min_cooldown"] = new_minute_cooldown
                 print(entry_edit)
-                # Configs.SlackAgentInstance.send_alert(
-                #     text=entry_edit, channel=Configs.slack_channel
-                # )
+                if enable_notification:
+                    Configs.SlackAgentInstance.send_alert(
+                        text=entry_edit, channel=Configs.slack_channel
+                    )
             Configs.is_deleted = False
 
         elif not Configs.is_deleted:
