@@ -55,7 +55,6 @@ class RequestMonitor():
 
                 else:
                     latest_threshold = Configs.THRESHOLD + 5
-                print("Current threshold: ", latest_threshold)
                 Logger.logger.info("Current threshold: " + str(latest_threshold) + "\n" + df.to_string())
                 df_timing = UtilsManager.calculate_stats(df, df_timing, threshold=latest_threshold, enable_notification=True)
             except Exception as exc:

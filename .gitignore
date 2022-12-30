@@ -15,3 +15,5 @@ cookies.pkl
 diagnostics
 docs
 monitor_log.out
+*.log
+logs

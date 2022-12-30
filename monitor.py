@@ -3,7 +3,7 @@ import os
 from monitor_app import SeleniumMonitor
 from monitor_app import *
 import jmespath
-os.environ["no_proxy"]="*"
+# os.environ["no_proxy"]="*"
 
 
 pd.options.display.max_columns = None
